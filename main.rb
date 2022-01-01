@@ -1,29 +1,36 @@
 require_relative 'field'
 require_relative 'genetic_algorithm'
 
-arr = [
-  [1, 1, 1, 1, 1],
-  [1, 0, 0, 0, 1],
-  [1, 0, 0, 0, 1],
-  [1, 0, 0, 0, 1],
-  [1, 0, 0, 0, 1],
-  [1, 1, 3, 1, 1],
-]
-solution = '110110010001010001001101100000'.split('')
+level_map = <<-TXT.gsub("\n", '')
+1111111
+1000001
+1000001
+1000001
+1000001
+1131111
+TXT
+width = 7
+height = 6
 
-fitness_func = lambda do |level_map|
+solution = '110110010001010001001101100000'
+
+fitness_func = lambda do |level_map, width, height|
   lambda do |solution|
-    solution = solution.split('').map(&:to_i) if solution.kind_of?(String)
-    f = Field.new(level_map)
+    f = Field.new(level_map, width, height)
     f.place_barrels(solution)
     f.accessible_barrels_count
   end
 end
 
 # check manually
-# puts fitness_func.call(arr).call(solution)
+# puts fitness_func.call(level_map, width, height).call(solution)
 
 ga = GeneticAlgorithm.new
-chromosome_len = arr.size * arr[0].size
-solution = ga.run(fitness_func.call(arr), chromosome_len, 0.6, 0.132, 100) rescue 'Not a integer'
+chromosome_len = level_map.size
+solution = ga.run(fitness_func.call(level_map, width, height), chromosome_len, 0.6, 0.132, 100) rescue 'Not a integer'
 puts "solution: #{solution}, chromosome_len: #{chromosome_len}"
+
+f = Field.new(level_map, width, height)
+f.place_barrels(solution.chromosome)
+f.accessible_barrels_count
+f.print_field

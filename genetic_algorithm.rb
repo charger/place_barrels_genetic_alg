@@ -1,3 +1,5 @@
+MaxResult = Struct.new(:fitness, :chromosome, :generation)
+
 class GeneticAlgorithm
   def generate(length)
     Array.new(length){rand(0..1)}.join
@@ -30,12 +32,12 @@ class GeneticAlgorithm
   def run(fitness, length, p_c, p_m, iterations=100)
     popul_size = 100
     population = Array.new(popul_size) { generate(length) }
-    winners = []
+    max_result = MaxResult.new(0, '', 0)
     1.upto(iterations) do |i|
       fitnesses = population.map{|e| fitness.call(e) }
       score, index = fitnesses.each_with_index.max
-      winners << [population[index]]
-      puts "generation: #{i} max_fit: #{score}, solution: #{population[index]} its score: #{fitnesses[i]}"
+      max_result = MaxResult.new(score, population[index], i) if score > max_result[:fitness]
+      puts "generation: #{i} max_fit: #{score}, solution: #{population[index]}"
 
       new_population = []
       1.upto(popul_size/2) do
@@ -48,7 +50,7 @@ class GeneticAlgorithm
       end
       population = new_population
     end
-    return winners
+    max_result
   rescue => e
     puts e
     puts e.backtrace
